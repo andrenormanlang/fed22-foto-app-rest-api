@@ -33,6 +33,7 @@
     "cross-env": "^7.0.3",
     "debug": "^4.3.4",
     "dotenv": "^16.0.3",
+    "email-verify": "^0.2.1",
     "express": "^4.18.2",
     "express-validator": "^6.14.3",
     "morgan": "^1.10.0"
