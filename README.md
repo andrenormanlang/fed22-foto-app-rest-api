@@ -1,15 +1,10 @@
-# FED22 API-utveckling Prisma Boilerplate
+# :camera:	REST API for a future Photo App :camera_flash:	
 
-This is a starter template/boilerplate for a TypeScript Node.js REST API using Express, Prisma and Express-validator.
+All this code is to be used for an REST API with authentication that serves as a backend for a future photo app.
+
+Deployed via Cyclic using Clever Cloud for the database storage of data.
 
 ## Usage
 
-Create a new repository on your GitHub profile using this template by clicking on **Use this template** above the file list and selecting **Create a new repository**.
-
-After your respository has been created on your GitHub profile, clone the repository, create an `.env` file and copy the contents from `.env.example`. Create a new MySQL-database and change the database-name in `DATABASE_URL` after the last slash to the name of your database.
-
 Run `npm install` to install all packages and then start the server using `npm run dev`.
 
-## Build
-
-Delete the `build/` directory if it exists from a previous build, and then run `npm run build` to transpile TypeScript into JavaScript.
