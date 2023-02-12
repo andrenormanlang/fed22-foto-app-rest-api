@@ -20,11 +20,6 @@ router.get('/', (req, res) => {
 	})
 })
 
-/**
- * photos
- */
-router.use('/photos', photos)
-
 
 /**
  * /register
@@ -41,6 +36,12 @@ router.post('/login',createLoginRules, login)
  */
 //router.use('/profile', basic, profile)
 router.use('/refresh', refresh)
+
+/**
+ * photos
+ */
+router.use('/photos', validateToken, photos)
+
 
 /**
  * /profile
