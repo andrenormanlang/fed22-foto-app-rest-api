@@ -44,8 +44,8 @@ router.use('/photos', validateToken, photos)
 
 
 /**
- * /profile
+ * /profile // for testing purposes only
  */
-//router.use('/profile', validateToken, profile)
+router.use('/profile', validateToken, profile)
 
 export default router
