@@ -1,10 +1,12 @@
 /**
+ * 
  * Photos Controller
  */
 import Debug from 'debug'
 import { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
 import prisma from '../prisma'
+import { createPhoto } from '../services/photo_service'
 
 // Create a new debug instance
 const debug = Debug('prisma-foto-api:photos_controller')
@@ -13,6 +15,7 @@ const debug = Debug('prisma-foto-api:photos_controller')
  * Get all photos
  */
 export const index = async (req: Request, res: Response) => {
+	
 	try {
 		const photos = await prisma.photo.findMany()
 
@@ -59,28 +62,37 @@ export const show = async (req: Request, res: Response) => {
  */
 export const store = async (req: Request, res: Response) => {
     const validationErrors = validationResult(req)
-	if (!validationErrors.isEmpty()){
-		return res.status(400).send({
-			status: "fail",
-			data: validationErrors.array()
-		})
-	}
+    if (!validationErrors.isEmpty()) {
+        return res.status(400).send({
+            status: "fail",
+            data: validationErrors.array()
+        })
+    }
 
-	try {
-		const photo = await prisma.photo.create({
-            data:req.body
-         
+    const { title, url, comment } = req.body
 
-		})
-		res.status(201).send({
-			status: "success",
-			data: photo
-		})
-	} catch(err){
-        console.log("Error thrown when creating a photo %o: %o", req.body, err)
-		res.status(500).send({message:"Something went wrong"})
-	}
+    try {
+        const photo = await createPhoto({
+            title,
+            url,
+            comment,
+            user_id: Number(req.token!.sub),
+        })
+
+        res.status(201).send({
+            status: "success",
+            data: photo,
+        })
+    }
+    catch (err) {
+        res.status(500).send({
+            status: "error",
+            message: "Could not create photo in database",
+        })
+		console.log(err);    
+    }
 }
+
 
 /**
  * Update a photo
@@ -100,6 +112,7 @@ export const update = async (req: Request, res: Response) => {
 
 	} catch (err) {
 		return res.status(500).send({ message: "Something went wrong" })
+		
 	}
 }
 
