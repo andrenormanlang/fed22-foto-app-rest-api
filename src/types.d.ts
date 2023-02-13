@@ -23,6 +23,13 @@ export type CreatePhotoData = {
 	user_id: number,
 }
 
+export type GetPhotosData = {
+	title: string,
+	url: string,
+	comment: string,
+	user_id: number,
+}
+
 
 export type JwtPayload ={
 	sub: number,

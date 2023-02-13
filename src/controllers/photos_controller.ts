@@ -6,7 +6,7 @@ import Debug from 'debug'
 import { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
 import prisma from '../prisma'
-import { createPhoto } from '../services/photo_service'
+import { createPhoto, getPhotos, getPhoto } from '../services/photo_service'
 
 // Create a new debug instance
 const debug = Debug('prisma-foto-api:photos_controller')
@@ -15,9 +15,18 @@ const debug = Debug('prisma-foto-api:photos_controller')
  * Get all photos
  */
 export const index = async (req: Request, res: Response) => {
-	
+	const user_id = Number(req.token!.sub)
+	const validationErrors = validationResult(req)
+    if (!validationErrors.isEmpty()) {
+        return res.status(400).send({
+            status: "fail",
+            data: validationErrors.array()
+        })
+    }
+
 	try {
-		const photos = await prisma.photo.findMany()
+		const photos = await getPhotos(user_id)
+	
 
 		res.send({
 			status: "success",
@@ -49,7 +58,7 @@ export const show = async (req: Request, res: Response) => {
 			data: photo,
 		})
 	}catch (err){
-        debug("Error thrown when finding product with id %o: %o", req.params.productId, err)
+        debug("Error thrown when finding photo with id %o: %o", req.params.photoId, err)
 	 	console.error(err)
 	 	res.status(404).send({
 		error: "Not found."
@@ -88,8 +97,7 @@ export const store = async (req: Request, res: Response) => {
         res.status(500).send({
             status: "error",
             message: "Could not create photo in database",
-        })
-		console.log(err);    
+        }) 
     }
 }
 
