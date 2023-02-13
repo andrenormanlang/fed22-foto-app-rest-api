@@ -2,8 +2,7 @@
  * Router Template
  */
 import express from 'express'
-import { body } from 'express-validator'
-import { index, show, store, update, destroy } from '../controllers/_controller'
+import { index, show, store, update, destroy } from '../controllers/photos_controller'
 
 
 const router = express.Router()
@@ -16,21 +15,21 @@ router.get('/', index)
 /**
  * GET /resource/:resourceId
  */
-router.get('/:resourceId', show)
+router.get('/:photoId', show)
 
 /**
  * POST /resource
  */
-router.post('/', [], store)
+router.post('/', store)
 
 /**
  * PATCH /resource/:resourceId
  */
-router.patch('/:resourceId', [], update)
+router.patch('/:photoId', [], update)
 
 /**
  * DELETE /resource/:resourceId
  */
-router.delete('/:resourceId', destroy)
+router.delete('/:photoId', destroy)
 
 export default router

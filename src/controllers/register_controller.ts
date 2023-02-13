@@ -1,5 +1,5 @@
 /**
- * Controller Template
+ * Register Controller
  */
 import bcrypt from 'bcrypt'
 import Debug from 'debug'
@@ -8,7 +8,7 @@ import { matchedData,validationResult } from 'express-validator'
 import prisma from '../prisma'
 
 // Create a new debug instance
-const debug = Debug('prisma-boilerplate:I_AM_LAZY_AND_HAVE_NOT_CHANGED_THIS_😛')
+const debug = Debug('prisma-foto-api:register')
 
 /**
  * Get all resources

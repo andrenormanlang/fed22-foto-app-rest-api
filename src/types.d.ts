@@ -9,6 +9,21 @@ export type CreateUserData = {
     last_name: string,
 }
 
+export type UpdateUserData = {
+	first_name?: string,
+	last_name?: string,
+	email?: string,
+	password?: string,
+}
+
+export type CreatePhotoData = {
+	title: string,
+	url: string,
+	comment: string,
+	user_id: number,
+}
+
+
 export type JwtPayload ={
 	sub: number,
 	first_name: string,

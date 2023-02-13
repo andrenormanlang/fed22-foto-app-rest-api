@@ -21,9 +21,9 @@ model Photo {
   id      Int     @id @default(autoincrement()) @db.UnsignedInt
   title   String  @db.VarChar(100)
   url     String
-  comment String?
+  comment String
   album   Album[]
-  user_id Int     @db.UnsignedInt
+  user_id Int     @db.UnsignedInt 
   user    User    @relation(fields: [user_id], references: [id])
 
   @@index([user_id], map: "Photo_user_id_fkey")
