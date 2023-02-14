@@ -1,7 +1,7 @@
 import express from "express";
 import photos from "./photos";
 import profile from "./profile";
-import { login, refresh, register } from "../controllers/ex.user_controller";
+import { login, refresh, register } from "../controllers/user_controller";
 import { createUserRules, createLoginRules } from "../validations/user_rules";
 import { validateToken } from "../middlewares/auth/jwt";
 
