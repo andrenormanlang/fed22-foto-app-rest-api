@@ -42,17 +42,20 @@ export const index = async (req: Request, res: Response) => {
 /**
  * Get a single photo by id
  */
-export const show = async (req: Request, res: Response) => {
-    const photoId = Number(req.params.phototId)
+/* export const show = async (req: Request, res: Response) => {
+    const photoId = Number(req.params.photoId)
+	const user_id = Number(req.token!.sub)
+
+	const validationErrors = validationResult(req)
+	if (!validationErrors.isEmpty()) {
+        return res.status(400).send({
+            status: "fail",
+            data: validationErrors.array()
+        })
+    }
 	try{
-		const photo = await prisma.photo.findUniqueOrThrow({
-			where: {
-                
-				id: photoId,
-			}
-			
-	
-		})
+		const photo = await getPhoto(photoId)
+
 		res.send({
 			status: "success",
 			data: photo,
@@ -64,7 +67,54 @@ export const show = async (req: Request, res: Response) => {
 		error: "Not found."
 	 	})
 	}
-}
+} */
+export const show = async (req: Request, res: Response) => {
+
+	const photoId = Number(req.params.photoId)
+
+	const user_id = req.token ? req.token.sub : NaN;
+
+	if (!req.token || isNaN(req.token.sub)) {
+	return res.status(401).send({
+		status: "fail",
+		message: "User is not authenticated"
+	});
+	}
+
+	try {
+	const photo = await getPhoto(photoId);
+
+	if (!photo) {
+		return res.status(404).send({
+		status: "fail",
+		message: "Photo not found"
+		});
+	}
+
+	if (photo.user_id !== user_id) {
+		return res.status(403).send({
+		status: "fail",
+		message: "Not authorized to access this photo"
+		});
+	}
+
+	return res.status(200).send({
+		status: "success",
+		data: {
+		id: photo.id,
+		title: photo.title,
+		url: photo.url,
+		comment: photo.comment
+		}
+	});
+
+	} catch (err) {
+	return res.status(500).send({
+		status: 'error',
+		message: 'Could not get the photo'
+	});
+	}
+};
 
 /**
  * Create a photo
