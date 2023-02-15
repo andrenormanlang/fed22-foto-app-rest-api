@@ -46,3 +46,13 @@ export type JwtPayload ={
 	iat?: number,
 	exp?: number
 }
+
+export type CreateAlbumData = {
+	title: string,
+	user_id: number,
+}
+
+export type GetAllAlbums = {
+	title: string,
+	user_id: number,
+}

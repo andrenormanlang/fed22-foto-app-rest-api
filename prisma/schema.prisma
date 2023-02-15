@@ -32,7 +32,7 @@ model Photo {
 model Album {
   id      Int     @id @default(autoincrement()) @db.UnsignedInt
   title   String  @db.VarChar(100)
-  album   Photo[]
+  photos   Photo[]
   user_id Int     @db.UnsignedInt
   user    User    @relation(fields: [user_id], references: [id])
 
