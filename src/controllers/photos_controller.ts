@@ -162,9 +162,9 @@ export const update = async (req: Request, res: Response) => {
         })
     }
 	const photoId = Number(req.params.photoId);
-	const user_id = req.token ? req.token.sub : NaN;
+	const user_id = Number(req.token!.sub);
   
-	if (!req.token || isNaN(req.token.sub)) {
+	if (!Number(req.token!.sub)) {
 	  return res.status(401).send({
 		status: "fail",
 		message: "User is not authenticated",
@@ -172,7 +172,7 @@ export const update = async (req: Request, res: Response) => {
 	}
   
 	try {
-	  const photo = await updatePhoto(photoId, req.body);
+	  const photo = await updatePhoto(photoId,req.body,user_id);
   
 	  if (photo === null) {
 		return res.status(404).send({
@@ -195,6 +195,7 @@ export const update = async (req: Request, res: Response) => {
 		  title: photo.title,
 		  url: photo.url,
 		  comment: photo.comment,
+		  user_id: Number(req.token!.sub),
 		},
 	  });
 	} catch (err) {
@@ -210,9 +211,9 @@ export const update = async (req: Request, res: Response) => {
 export const destroy = async (req: Request, res: Response) => {
 	
 	const photoId = Number(req.params.photoId);
-	const user_id = req.token ? req.token.sub : NaN;
+	const user_id = Number(req.token!.sub)
   
-	if (!req.token || isNaN(req.token.sub)) {
+	if (!Number(req.token!.sub)) {
 	  return res.status(401).send({
 		status: "fail",
 		message: "User is not authenticated",
@@ -220,7 +221,8 @@ export const destroy = async (req: Request, res: Response) => {
 	}
   
 	try {
-	  const photo = await deletePhoto(photoId);
+	  const photo = await deletePhoto(photoId, user_id);
+
   
 	  if (photo === null) {
 		return res.status(404).send({
