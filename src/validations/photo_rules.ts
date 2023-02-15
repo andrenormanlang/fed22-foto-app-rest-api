@@ -6,24 +6,17 @@ import { body } from "express-validator";
 // problemas nessa importacao
 import prisma from '../prisma'
 
-export const getUserByEmail = async (email: string) => {
-	return await prisma.user.findUnique({
-		where: {
-			email: email,
-		}
-	})
-}
-
-export const createUserRules = [
-  body("email").isEmail().custom(async (value) => {
-      // check if a User with that email already exists
-      const user = await getUserByEmail(value);
-      if (user) {
-        // user already exists, throw a hissy-fit
-        return Promise.reject("Email already exists");
-      }
-    }),
-  body("password").isString().bail().isLength({ min: 6 }),
-  body("first_name").isString().bail().isLength({ min: 3 }),
-  body("last_name").isString().bail().isLength({ min: 3 }),
+export const createPhotoRules = [
+  body("title").isString().bail().isLength({ min: 3 }).withMessage("Title must be at least 3 characters"),
+  body("url").isString().isURL().withMessage("URL must be a valid URL"),
+  body("comment").isString().bail().isLength({ min: 3 }).withMessage("Comment must be at least 3 characters"),
 ];
+
+export const updatePhotoRules = [
+  body("title").optional().isString().bail().isLength({ min: 3 }).withMessage("Title must be at least 3 characters"),
+  body("url").optional().isString().isURL().withMessage("URL must be a valid URL"),
+  body("comment").optional().isString().bail().isLength({ min: 3 }).withMessage("Comment must be at least 3 characters"),
+];
+
+
+

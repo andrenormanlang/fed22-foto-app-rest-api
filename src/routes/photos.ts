@@ -3,7 +3,7 @@
  */
 import express from 'express'
 import { index, show, store, update, destroy } from '../controllers/photos_controller'
-
+import { createPhotoRules, updatePhotoRules  } from '../validations/photo_rules'
 
 const router = express.Router()
 
@@ -20,12 +20,12 @@ router.get('/:photoId', show)
 /**
  * POST /resource
  */
-router.post('/', store)
+router.post('/', createPhotoRules, store)
 
 /**
  * PATCH /resource/:resourceId
  */
-router.patch('/:photoId', [], update)
+router.patch('/:photoId', updatePhotoRules, update)
 
 /**
  * DELETE /resource/:resourceId

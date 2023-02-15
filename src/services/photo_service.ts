@@ -1,4 +1,4 @@
-import { CreatePhotoData, GetPhotosData } from '../types'
+import { CreatePhotoData, GetPhotosData, UpdatePhotoData } from '../types'
 import prisma from '../prisma'
 
 /**
@@ -37,4 +37,31 @@ export const getPhoto = async (photoId: number) => {
  */
 export const createPhoto = async (data: CreatePhotoData) => {
     return await prisma.photo.create({ data })
+}
+
+/**
+ * Update a photo
+ *
+ * @param data Photo Details
+ */
+export const updatePhoto = async (photoId: number, userData: UpdatePhotoData) => {
+	return await prisma.photo.update({
+		where: {
+			id: photoId,
+		},
+		data: userData,
+	})
+ }
+
+/**
+ * Delete a photo
+ *
+ * @param data Photo Details
+ */
+export const deletePhoto = async (photoId: number) => {
+  return await prisma.photo.delete({
+    where: {
+      id: photoId,
+    },
+  })
 }
