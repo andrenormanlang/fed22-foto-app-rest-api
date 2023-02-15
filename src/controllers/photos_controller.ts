@@ -2,11 +2,12 @@
  * 
  * Photos Controller
  */
+import bcrypt from 'bcrypt'
 import Debug from 'debug'
 import { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
 import prisma from '../prisma'
-import { createPhoto, getPhotos, getPhoto } from '../services/photo_service'
+import { createPhoto, getPhotos, getPhoto, updatePhoto, deletePhoto } from '../services/photo_service'
 
 // Create a new debug instance
 const debug = Debug('prisma-foto-api:photos_controller')
@@ -109,6 +110,7 @@ export const show = async (req: Request, res: Response) => {
 	});
 
 	} catch (err) {
+	debug("Error thrown when finding photo with id %o: %o", req.params.photoId, err)
 	return res.status(500).send({
 		status: 'error',
 		message: 'Could not get the photo'
@@ -151,43 +153,102 @@ export const store = async (req: Request, res: Response) => {
     }
 }
 
-
-/**
- * Update a photo
- */
 export const update = async (req: Request, res: Response) => {
-    const photoId = Number(req.params.photoId)
-
-	try {
-		const photo = await prisma.photo.update({
-			where: {
-				id: photoId,
-			},
-			data: req.body,
-		})
-
-		return res.send(photo)
-
-	} catch (err) {
-		return res.status(500).send({ message: "Something went wrong" })
-		
+	const validationErrors = validationResult(req)
+    if (!validationErrors.isEmpty()) {
+        return res.status(400).send({
+            status: "fail",
+            data: validationErrors.array()
+        })
+    }
+	const photoId = Number(req.params.photoId);
+	const user_id = req.token ? req.token.sub : NaN;
+  
+	if (!req.token || isNaN(req.token.sub)) {
+	  return res.status(401).send({
+		status: "fail",
+		message: "User is not authenticated",
+	  });
 	}
-}
-
+  
+	try {
+	  const photo = await updatePhoto(photoId, req.body);
+  
+	  if (photo === null) {
+		return res.status(404).send({
+		  status: "fail",
+		  message: "Photo not found",
+		});
+	  }
+  
+	  if (photo.user_id !== user_id) {
+		return res.status(403).send({
+		  status: "fail",
+		  message: "Not authorized to access this photo",
+		});
+	  }
+  
+	  return res.status(200).send({
+		status: "success",
+		data: {
+		  id: photo.id,
+		  title: photo.title,
+		  url: photo.url,
+		  comment: photo.comment,
+		},
+	  });
+	} catch (err) {
+	  return res.status(500).send({
+		status: "error",
+		message: "Could not update the photo",
+	  });
+	}
+  };
 /**
  * Delete a photo
  */
 export const destroy = async (req: Request, res: Response) => {
-    const photoId = Number(req.params.photoId)
-
-	// verify that the publisher doesn't have any associated books
+	
+	const photoId = Number(req.params.photoId);
+	const user_id = req.token ? req.token.sub : NaN;
+  
+	if (!req.token || isNaN(req.token.sub)) {
+	  return res.status(401).send({
+		status: "fail",
+		message: "User is not authenticated",
+	  });
+	}
+  
 	try {
-		const photo = await prisma.photo.findUniqueOrThrow({
-			where: {
-				id: photoId,
-			},
-		})
-    } catch(err){
-        return res.status(404).send({ message: "Not found" })
-    }
-}
+	  const photo = await deletePhoto(photoId);
+  
+	  if (photo === null) {
+		return res.status(404).send({
+		  status: "fail",
+		  message: "Photo not found",
+		});
+	  }
+  
+	  if (photo.user_id !== user_id) {
+		return res.status(403).send({
+		  status: "fail",
+		  message: "Not authorized to access this photo",
+		});
+	  }
+  
+	  return res.status(200).send({
+		status: "success",
+		data: null,
+	  });
+	} catch (err) {
+	  return res.status(500).send({
+		status: "error",
+		message: "Could not delete the photo",
+	  });
+	}
+  };
+	
+
+
+
+

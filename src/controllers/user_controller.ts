@@ -91,6 +91,7 @@ export const register = async (req: Request, res: Response) => {
     validatedData.password = hashedPassword
 
     const { email, password, first_name, last_name } = validatedData
+    console.log(validatedData);
 
     try {
         await createUser({
