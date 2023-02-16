@@ -63,6 +63,14 @@ Get one photo.
 ```json
 {
   "title": "Cindy Sherman",
+  "url": "http://utbweb.its.ltu.se/~anolan-1/medieinstitutet/photo-api/960x0.jpg",
+  "comment": "Untitled #612, 2019"
+}
+```
+
+```json
+{
+  "title": "Cindy Sherman",
   "url": "http://utbweb.its.ltu.se/~anolan-1/medieinstitutet/photo-api/P78503_9.jpg",
   "comment": "Untitled - 1976"
 }
@@ -120,6 +128,13 @@ Get album details, including photos.
 
 ```
 
+```json
+{
+  "title": "See the Sherman Show"
+}
+
+```
+
 ## User
 
 ## `POST /register`
@@ -128,9 +143,26 @@ Register a new user.
 
 ```json
 {
-  "first_name": "Johan ",
-  "last_name": "Nordström",
-  "email": "jn@thehiveresistance.con",
-  "password": "abc123"
+  "first_name": "Andre",
+  "last_name": "Lang",
+  "email": "andrenormanlang@gmail.com",
+  "password": "last of us"
 }
 ```
+
+```json
+{
+  "first_name": "Signe",
+  "last_name": "Lang",
+  "email": "signelang@gmail.com",
+  "password": "pixie-cat-elvin-baby"
+}
+```
+
+```json
+{
+  "first_name": "Andre",
+  "last_name": "Lang",
+  "email": "andre.lang@medieinstitutet.se",
+  "password": "pixie-cat-elvin-baby"
+}

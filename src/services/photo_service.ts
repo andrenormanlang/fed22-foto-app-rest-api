@@ -1,4 +1,4 @@
-import { CreatePhotoData, GetPhotosData, UpdatePhotoData } from '../types'
+import { CreatePhotoData,  UpdatePhotoData } from '../types'
 import prisma from '../prisma'
 
 /**
