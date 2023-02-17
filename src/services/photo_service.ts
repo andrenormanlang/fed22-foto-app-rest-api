@@ -1,5 +1,6 @@
 import { CreatePhotoData,  UpdatePhotoData } from '../types'
 import prisma from '../prisma'
+import {NotFound, Forbidden} from 'http-errors'
 
 /**
  * Get all photos
@@ -44,7 +45,17 @@ export const createPhoto = async (data: CreatePhotoData) => {
  *
  * @param data Photo Details
  */
-export const updatePhoto = async (photoId: number, userData: UpdatePhotoData) => {
+export const updatePhoto = async (photoId: number, userData: UpdatePhotoData, user_id:number) => {
+  const photo = await getPhoto(photoId);
+  
+  if (!photo) {
+    throw NotFound('Photo not found');
+  }
+
+  if (photo.user_id !== user_id) {
+    throw Forbidden('Not authorized to access this photo');
+  }
+  
   return await prisma.photo.update({
     where: {
       id: photoId,    

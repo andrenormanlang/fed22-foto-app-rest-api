@@ -2,12 +2,11 @@
  * 
  * Photos Controller
  */
-import bcrypt from 'bcrypt'
 import Debug from 'debug'
 import { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
-import prisma from '../prisma'
 import { createPhoto, getPhotos, getPhoto, updatePhoto, deletePhoto } from '../services/photo_service'
+import {HttpError} from  'http-errors'
 
 // Create a new debug instance
 const debug = Debug('prisma-foto-api:photos_controller')
@@ -40,35 +39,6 @@ export const index = async (req: Request, res: Response) => {
 	}
 }
 
-/**
- * Get a single photo by id
- */
-/* export const show = async (req: Request, res: Response) => {
-    const photoId = Number(req.params.photoId)
-	const user_id = Number(req.token!.sub)
-
-	const validationErrors = validationResult(req)
-	if (!validationErrors.isEmpty()) {
-        return res.status(400).send({
-            status: "fail",
-            data: validationErrors.array()
-        })
-    }
-	try{
-		const photo = await getPhoto(photoId)
-
-		res.send({
-			status: "success",
-			data: photo,
-		})
-	}catch (err){
-        debug("Error thrown when finding photo with id %o: %o", req.params.photoId, err)
-	 	console.error(err)
-	 	res.status(404).send({
-		error: "Not found."
-	 	})
-	}
-} */
 export const show = async (req: Request, res: Response) => {
 
 	const photoId = Number(req.params.photoId)
@@ -158,7 +128,7 @@ export const update = async (req: Request, res: Response) => {
 	const user_id = Number(req.token!.sub);
   
 	try {
-	  let photo = await getPhoto(photoId);
+	  /* let photo = await getPhoto(photoId);
   
 	  if (!photo) {
 		return res.status(404).send({
@@ -172,8 +142,8 @@ export const update = async (req: Request, res: Response) => {
 		  status: "fail",
 		  message: "Not authorized to access this photo",
 		});
-	  }
-	  photo = await updatePhoto(photoId, req.body);
+	  } */
+	  const photo = await updatePhoto(photoId, req.body, user_id);
 	  return res.status(200).send({
 		status: "success",
 		data: {
@@ -184,13 +154,21 @@ export const update = async (req: Request, res: Response) => {
 		  user_id: user_id,
 		},
 	  });
-	} catch (err) {
-	  return res.status(500).send({
+	} 
+	
+	 catch (err) {
+	  if(err instanceof HttpError) {
+	  	
+		return res.status(err.statusCode).send({
 		status: "error",
-		message: "Could not update the photo",
-	  });
+		message: err.message,
+		})}
+	  else{
+		return res.status(500)
+	  } 
 	}
   };
+
 /**
  * Delete a photo
  */
