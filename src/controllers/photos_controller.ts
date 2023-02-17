@@ -128,21 +128,6 @@ export const update = async (req: Request, res: Response) => {
 	const user_id = Number(req.token!.sub);
   
 	try {
-	  /* let photo = await getPhoto(photoId);
-  
-	  if (!photo) {
-		return res.status(404).send({
-		  status: "fail",
-		  message: "Photo not found",
-		});
-	  }
-  
-	  if (photo.user_id !== user_id) {
-		return res.status(403).send({
-		  status: "fail",
-		  message: "Not authorized to access this photo",
-		});
-	  } */
 	  const photo = await updatePhoto(photoId, req.body, user_id);
 	  return res.status(200).send({
 		status: "success",
@@ -167,7 +152,7 @@ export const update = async (req: Request, res: Response) => {
 		return res.status(500)
 	  } 
 	}
-  };
+};
 
 /**
  * Delete a photo
@@ -178,34 +163,24 @@ export const destroy = async (req: Request, res: Response) => {
 	const user_id = Number(req.token!.sub)
   
 	try {
-		let photo = await getPhoto(photoId);
+		const photo = await deletePhoto(photoId, user_id);
 
-  
-	  if (photo === null) {
-		return res.status(404).send({
-		  status: "fail",
-		  message: "Photo not found",
-		});
-	  }
-  
-	  if (photo.user_id !== user_id) {
-		return res.status(403).send({
-		  status: "fail",
-		  message: "Not authorized to access this photo",
-		});
-	  }
-	  photo = await deletePhoto(photoId);
-	  return res.status(200).send({
+		return res.status(200).send({
 		status: "success",
-		data: null,
-	  });
+		data: null,	
+		});	
 	} catch (err) {
-	  return res.status(500).send({
+		if(err instanceof HttpError) {
+			
+		return res.status(err.statusCode).send({
 		status: "error",
-		message: "Could not delete the photo",
-	  });
+		message: err.message,
+		})}
+		else{
+		return res.status(500)
+		} 
 	}
-  };
+};
 	
 
 
