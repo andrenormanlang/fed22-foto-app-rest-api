@@ -2,8 +2,8 @@
  * Router Template
  */
 import express from 'express'
-import { index, show, store, update, destroy, addPhotoToAlbum, addPhotosToAlbum, removePhoto } from '../controllers/albums_controller'
-import { createAlbumRules, updatePhotoRules  } from '../validations/album_rules'
+import { index, show, store, update, destroy, addPhotosToAlbum, removePhoto } from '../controllers/albums_controller'
+import { createAlbumRules, updateAlbumRules  } from '../validations/album_rules'
 
 const router = express.Router()
 
@@ -36,7 +36,7 @@ router.delete('/:albumId/photos/:photoId', removePhoto)
 /**
  * PATCH /resource/:resourceId
  */
-router.patch('/:albumId', updatePhotoRules, update)
+router.patch('/:albumId', updateAlbumRules, update)
 
 /**
  * DELETE /resource/:resourceId

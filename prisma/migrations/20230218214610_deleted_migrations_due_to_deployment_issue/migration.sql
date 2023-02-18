@@ -15,8 +15,8 @@ CREATE TABLE `Photo` (
     `id` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(100) NOT NULL,
     `url` VARCHAR(191) NOT NULL,
-    `comment` VARCHAR(191) NULL,
-    `user_id` INTEGER UNSIGNED NULL,
+    `comment` VARCHAR(1000) NOT NULL,
+    `user_id` INTEGER UNSIGNED NOT NULL,
 
     INDEX `Photo_user_id_fkey`(`user_id`),
     PRIMARY KEY (`id`)
@@ -42,7 +42,7 @@ CREATE TABLE `_AlbumToPhoto` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `Photo` ADD CONSTRAINT `Photo_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `Photo` ADD CONSTRAINT `Photo_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Album` ADD CONSTRAINT `Album_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
