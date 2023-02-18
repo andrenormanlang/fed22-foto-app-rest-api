@@ -66,3 +66,4 @@ export type Album ={
   title: string;
   user_id: number; 
 }
+

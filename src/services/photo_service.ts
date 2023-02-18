@@ -20,7 +20,6 @@ export const getPhotos = async (user_id: number) => {
         })
 }
 
-
 /**
  * Get a single photo
  *
@@ -35,7 +34,6 @@ export const getPhoto = async (photoId: number) => {
         },
       })
 }
-
 
 /**
  * Create a photo

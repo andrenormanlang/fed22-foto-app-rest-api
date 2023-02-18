@@ -5,9 +5,9 @@
 import Debug from 'debug'
 import { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
-import prisma from '../prisma'
-import { createAlbum, getAlbums, getAlbum, updateAlbum, deleteAlbum, removePhotoFromAlbum   } from '../services/album_service'
+import { createAlbum, getAlbums, getAlbum, updateAlbum, addPhotos, deleteAlbum, removePhotoFromAlbum, getAlbumUser} from '../services/album_service'
 import {Album} from '../types'
+import {HttpError} from  'http-errors'
 // Create a new debug instance
 const debug = Debug('prisma-foto-api:photos_controller')
 
@@ -120,140 +120,113 @@ export const store = async (req: Request, res: Response) => {
 /**
  * Add a photo to a album
  */
-export const addPhotoToAlbum = async (req: Request, res: Response) => {
-	const albumId = Number(req.params.albumId);
-	const photoId = Number(req.body.photoId);
-	const user_id = Number(req.token!.sub);
+// export const addPhotoToAlbum = async (req: Request, res: Response) => {
+// 	const albumId = Number(req.params.albumId);
+// 	const photoId = Number(req.body.photoId);
+// 	const user_id = Number(req.token!.sub);
 
-	const album = await prisma.album.findUnique({ where: { id: albumId } });
-	const user = req.user;
-	if (!album) {
-		return res.status(404).send({
-		status: "error",
-		message: "Album not found"
-		});
-  	}
-	  if (!album || album.user_id !==  user_id) {
-		return res.status(403).send({
-		  status: "error",
-		  message: "You do not have permission to modify this album"
-		});
-	  }
+// 	const album = await prisma.album.findUnique({ where: { id: albumId } });
+// 	const user = req.user;
+// 	if (!album) {
+// 		return res.status(404).send({
+// 		status: "error",
+// 		message: "Album not found"
+// 		});
+//   	}
+// 	  if (!album || album.user_id !==  user_id) {
+// 		return res.status(403).send({
+// 		  status: "error",
+// 		  message: "You do not have permission to modify this album"
+// 		});
+// 	  }
 
-	  const photo = await prisma.photo.findUnique({ where: { id: photoId } });
-		if (!photo || photo.user_id !== user_id) {
-			return res.status(403).send({
-			status: "error",
-			message: "You do not have permission to add this photo to the album"
-			});
-		}
+// 	  const photo = await prisma.photo.findUnique({ where: { id: photoId } });
+// 		if (!photo || photo.user_id !== user_id) {
+// 			return res.status(403).send({
+// 			status: "error",
+// 			message: "You do not have permission to add this photo to the album"
+// 			});
+// 		}
 
-	const validationErrors = validationResult(req)
-    if (!validationErrors.isEmpty()) {
-        return res.status(400).send({
-            status: "fail",
-            data: validationErrors.array()
-        })
-    }
+// 	const validationErrors = validationResult(req)
+//     if (!validationErrors.isEmpty()) {
+//         return res.status(400).send({
+//             status: "fail",
+//             data: validationErrors.array()
+//         })
+//     }
   
-	try {
-	  const album = await prisma.album.update({
-		where: { id: albumId },
-		data: {
-		  photos: {
-			connect: { id: photoId }
-		  }
-		},
-		include: { photos: true }
-	  });
+// 	try {
+// 	  const album = await prisma.album.update({
+// 		where: { id: albumId },
+// 		data: {
+// 		  photos: {
+// 			connect: { id: photoId }
+// 		  }
+// 		},
+// 		include: { photos: true }
+// 	  });
 
-	  res.status(201).send({
-		status: "success",
-		data: null
-	  });
-	} catch (err) {
-	  res.status(500).send({
-		status: "error",
-		message: "Could not add photo to album"
-	  });
-	}
-  };
+// 	  res.status(201).send({
+// 		status: "success",
+// 		data: null
+// 	  });
+// 	} catch (err) {
+// 	  res.status(500).send({
+// 		status: "error",
+// 		message: "Could not add photo to album"
+// 	  });
+// 	}
+//   };
 
 
 /**
  * Add multiple photos to a album
  */
 export const addPhotosToAlbum = async (req: Request, res: Response) => {
-	const albumId = Number(req.params.albumId);
-	const photo_id = req.body.photo_id;
-	if (!photo_id) {
-	  return res.status(400).send({
-		status: "fail",
-		message: "Missing photos in request body"
-	  });
-	}
-	const photo_idArray = photo_id.map(Number);
-	const user_id = Number(req.token!.sub);
-  
-	const album = await prisma.album.findUnique({ where: { id: albumId } });
-	const user = req.user;
-	if (!album) {
-	  return res.status(404).send({
-		status: "error",
-		message: "Album not found"
-	  });
-	}
-	if (!album || album.user_id !== user_id) {
-	  return res.status(403).send({
-		status: "error",
-		message: "You do not have permission to modify this album"
-	  });
-	}
-  
-	const photos = await prisma.photo.findMany({
-	  where: { id: { in: photo_idArray }, user_id }
-	});
-	if (photos.length !== photo_idArray.length) {
-	  return res.status(403).send({
-		status: "error",
-		message: "You do not have permission to add some of the photos to the album"
-	  });
-	}
-  
-	const validationErrors = validationResult(req);
+	const validationErrors = validationResult(req)
 	if (!validationErrors.isEmpty()) {
 	  return res.status(400).send({
 		status: "fail",
 		data: validationErrors.array()
-	  });
+	  })
 	}
-  
+	
 	try {
-	    await prisma.album.update({
-		where: { id: albumId },
-		data: {
-		  photos: {
-			connect: photo_idArray.map((id: number) => ({ id }))
+		const albumId = Number(req.params.albumId);
+		const photo_id = req.body.photo_id;
+
+		if (!photo_id || !photo_id.some((id: string) => id.trim().length)) {
+			return res.status(400).send({
+			  status: "fail",
+			  message: "Missing photos in request body",
+			});
 		  }
-		},
-		include: { photos: true }
-	  });
-  
-	  res.status(201).send({
-		status: "success",
-		data: null
-	  });
+
+		const photo_idArray = photo_id.filter(Boolean).map(Number);
+		const user_id = Number(req.token!.sub);
+		
+		await addPhotos(albumId, photo_idArray, user_id);
+
+		return res.status(200).send({
+			status: "success",
+			data: null,	
+			});	
 	} catch (err) {
-	  res.status(500).send({
+		if(err instanceof HttpError) {
+			
+		return res.status(err.statusCode).send({
 		status: "error",
-		message: "Could not add photos to album"
-	  });
+		message: err.message,
+		})}
+		else{
+		return res.status(500)
+		} 
 	}
-  };
-
-
+};
+  
 /**
- * Remove a photo a album
+ * Remove a photo from a album
  */
 export const removePhoto = async (req: Request, res: Response) => {
 	const albumId = Number(req.params.albumId);
@@ -261,10 +234,7 @@ export const removePhoto = async (req: Request, res: Response) => {
 	const userId = Number(req.token!.sub);
   
 	try {
-	  const album = await prisma.album.findUnique({
-		where: { id: albumId },
-		include: { user: true },
-	  });
+	  const album = await getAlbumUser(albumId);
   
 	  if (!album) {
 		return res.status(404).send({
@@ -284,11 +254,16 @@ export const removePhoto = async (req: Request, res: Response) => {
   
 	  return res.status(200).send({
 		status: 'success',
-		data: null
-		  ,
+		data: null,
 	  });
-	} catch (err) {
+	} catch (err: any) {
 	  console.error(err);
+	  if (err.message === 'Album not found' || err.message === 'Photo not found') {
+		return res.status(404).send({
+		  status: 'fail',
+		  message: err.message,
+		});
+	  }
 	  return res.status(500).send({
 		status: 'error',
 		message: 'Could not remove photo from album',
@@ -296,10 +271,11 @@ export const removePhoto = async (req: Request, res: Response) => {
 	}
   };
 
+
 /**
  * Update a album
  */
-  export const update = async (req: Request, res: Response) => {
+export const update = async (req: Request, res: Response) => {
 	const validationErrors = validationResult(req);
 	if (!validationErrors.isEmpty()) {
 	  return res.status(400).send({
@@ -343,8 +319,7 @@ export const removePhoto = async (req: Request, res: Response) => {
 		message: "Could not update the album",
 	  });
 	}
-  }
-
+}
 
 /**
  * Delete an album
@@ -352,40 +327,40 @@ export const removePhoto = async (req: Request, res: Response) => {
  */
 export const destroy = async (req: Request, res: Response) => {
 	const albumId = Number(req.params.albumId);
-  const user_id = Number(req.token!.sub);
+  	const user_id = Number(req.token!.sub);
 
-  try {
-    const album = await getAlbum(albumId);
+  	try {
+    	const album = await getAlbum(albumId);
 
     if (!album) {
-      return res.status(404).send({
+      	return res.status(404).send({
         status: 'fail',
         message: 'Album not found',
-      });
+    	});
     }
 
     if (album.user_id !== user_id) {
-      return res.status(403).send({
+      	return res.status(403).send({
         status: 'fail',
         message: 'Not authorized to access this album',
-      });
+      	});
     }
 
     // Delete the album
     await deleteAlbum(albumId);
 
     return res.status(200).send({
-      status: 'success',
-      data: null,
+    	status: 'success',
+      	data: null,
     });
-  } catch (err) {
+  	} catch (err) {
     debug('Error thrown when finding album with id %o: %o', req.params.albumId, err);
-    return res.status(500).send({
+	return res.status(500).send({
       status: 'error',
       message: 'Could not delete the album',
     });
   }
-  };
+};
 	
 
 

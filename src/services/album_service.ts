@@ -1,6 +1,6 @@
 import { CreateAlbumData, UpdateAlbumData } from '../types'
 import prisma from '../prisma'
-import {NotFound, Forbidden} from 'http-errors'
+import {NotFound, Forbidden, HttpError} from 'http-errors'
 
 /**
  * Create a Album
@@ -44,6 +44,7 @@ export const getAlbum = async (albumId: number) => {
 }
 
 
+
 /**
  * Add a photo to a Album
  *
@@ -62,6 +63,46 @@ export const getAlbum = async (albumId: number) => {
 
 // }
 
+class PhotoNotFoundError extends HttpError {
+  constructor(message: string = "Photo not found") {
+    super(message);
+    this.statusCode = 404;
+    Object.setPrototypeOf(this, PhotoNotFoundError.prototype);
+  }
+}
+
+export const addPhotos = async (albumId: number, photoIds: number[], user_id: number) => {
+  const album = await prisma.album.findUnique({ where: { id: albumId } });
+  if (!album) {
+    throw new NotFound('Album not found');
+  }
+  if (album.user_id !== user_id) {
+    throw new Forbidden('Not authorized to access this album');
+  }
+  
+  const photos = await prisma.photo.findMany({
+    where: { id: { in: photoIds } }
+  });
+  if (photos.length !== photoIds.length) {
+    throw new Forbidden('Some of the photos do not exist');
+  }
+
+  const userIds = photos.map((photo) => photo.user_id);
+  if (userIds.some((id) => id !== user_id)) {
+    throw new Forbidden('You do not have permission to add some of the photos to the album');
+  }
+
+  await prisma.album.update({
+    where: { id: albumId },
+    data: {
+      photos: {
+        connect: photoIds.map((id: number) => ({ id }))
+      }
+    },
+    include: { photos: true }
+  });
+};
+
 /**
  * Remove a photo from a Album but not the photo itself
  *
@@ -70,27 +111,36 @@ export const getAlbum = async (albumId: number) => {
 export const removePhotoFromAlbum = async (albumId: number, photoId: number) => {
   const album = await prisma.album.findUnique({
     where: { id: albumId },
-    include: { photos: true },
+    select: { photos: true },
   });
 
   if (!album) {
-    throw new Error('Album not found');
+    throw NotFound('Album not found');
   }
 
-  const photoIndex = album.photos.findIndex((photo) => photo.id === photoId);
+  const photo = album.photos.find((p) => p.id === photoId);
 
-  if (photoIndex === -1) {
-    throw new Error('Photo not found in album');
+  if (!photo) {
+    throw NotFound('Photo not found');
   }
 
-  const updatedAlbum = await prisma.album.update({
+  await prisma.album.update({
     where: { id: albumId },
-    data: { photos: { disconnect: { id: photoId } } },
-    include: { photos: true },
+    data: {
+      photos: {
+        disconnect: { id: photoId },
+      },
+    },
   });
-
-  return updatedAlbum;
 };
+
+export const getAlbumUser = async (albumId: number) => {
+  return await prisma.album.findUnique({
+    where: { id: albumId },
+    include: { user: true },
+  });
+};
+
 
 
 /**

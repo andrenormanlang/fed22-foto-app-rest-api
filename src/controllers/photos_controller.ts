@@ -158,7 +158,13 @@ export const update = async (req: Request, res: Response) => {
  * Delete a photo
  */
 export const destroy = async (req: Request, res: Response) => {
-	
+	const validationErrors = validationResult(req)
+	if (!validationErrors.isEmpty()) {
+	  return res.status(400).send({
+		status: "fail",
+		data: validationErrors.array()
+	  })
+	}
 	const photoId = Number(req.params.photoId);
 	const user_id = Number(req.token!.sub)
   
