@@ -1,5 +1,6 @@
 import { CreateAlbumData, UpdateAlbumData } from '../types'
 import prisma from '../prisma'
+import {NotFound, Forbidden} from 'http-errors'
 
 /**
  * Create a Album

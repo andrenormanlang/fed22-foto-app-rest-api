@@ -10,7 +10,13 @@ export const getPhotos = async (user_id: number) => {
         {
             where: {
                 user_id: user_id
-            }
+            },
+            select: {
+                id: true,
+                title: true,
+                url: true,
+                comment: true
+            }    
         })
 }
 
