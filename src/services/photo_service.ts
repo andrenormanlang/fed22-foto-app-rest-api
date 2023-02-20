@@ -1,5 +1,6 @@
-import { CreatePhotoData, GetPhotosData, UpdatePhotoData } from '../types'
+import { CreatePhotoData,  UpdatePhotoData } from '../types'
 import prisma from '../prisma'
+import {NotFound, Forbidden} from 'http-errors'
 
 /**
  * Get all photos
@@ -9,10 +10,15 @@ export const getPhotos = async (user_id: number) => {
         {
             where: {
                 user_id: user_id
-            }
+            },
+            select: {
+                id: true,
+                title: true,
+                url: true,
+                comment: true
+            }    
         })
 }
-
 
 /**
  * Get a single photo
@@ -21,14 +27,13 @@ export const getPhotos = async (user_id: number) => {
  */
 export const getPhoto = async (photoId: number) => {
 
-      return await prisma.photo.findUniqueOrThrow({
+      return await prisma.photo.findUnique({
         where: {
           id: photoId,
           
         },
       })
 }
-
 
 /**
  * Create a photo
@@ -44,24 +49,20 @@ export const createPhoto = async (data: CreatePhotoData) => {
  *
  * @param data Photo Details
  */
-export const updatePhoto = async (photoId: number, userData: UpdatePhotoData, user_id: number) => {
-  const photo = await prisma.photo.findUnique({
-    where: {
-      id: photoId,
-    },
-  });
-
+export const updatePhoto = async (photoId: number, userData: UpdatePhotoData, user_id:number) => {
+  const photo = await getPhoto(photoId);
+  
   if (!photo) {
-    throw new Error('Photo not found');
+    throw NotFound('Photo not found');
   }
 
   if (photo.user_id !== user_id) {
-    throw new Error('Not authorized to update this photo');
+    throw Forbidden('Not authorized to access this photo');
   }
-
+  
   return await prisma.photo.update({
     where: {
-      id: photoId,
+      id: photoId,    
     },
     data: userData,
   });
@@ -72,22 +73,17 @@ export const updatePhoto = async (photoId: number, userData: UpdatePhotoData, us
  *
  * @param data Photo Details
  */
-export const deletePhoto = async (photoId: number, user_id: number) => {
-  const photo = await prisma.photo.findUnique({
-    where: {
-      id: photoId,
-    },
-  });
+export const deletePhoto = async (photoId: number, user_id:number) => {
+  
+    const photo = await getPhoto(photoId)
 
-  if (!photo) {
-    throw new Error('Photo not found');
-  }
-
-  if (photo.user_id !== user_id) {
-    throw new Error('Not authorized to delete this photo');
-  }
-
-  return await prisma.photo.delete({
+    if (!photo) {
+      throw NotFound('Photo not found');
+    }
+    if (photo.user_id !== user_id) {
+      throw Forbidden('Not authorized to access this photo');
+    }
+    return await prisma.photo.delete({
     where: {
       id: photoId,
     },

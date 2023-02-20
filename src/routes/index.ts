@@ -1,5 +1,6 @@
 import express from "express";
 import photos from "./photos";
+import albums from "./albums";
 import profile from "./profile";
 import { login, refresh, register } from "../controllers/user_controller";
 import { createUserRules, createLoginRules } from "../validations/user_rules";
@@ -37,6 +38,11 @@ router.use("/refresh", refresh);
  * photos
  */
 router.use("/photos",validateToken, photos); //validate token
+
+/**
+ * photos
+ */
+router.use("/albums",validateToken, albums); //validate token
 
 /**
  * /profile // for testing purposes only

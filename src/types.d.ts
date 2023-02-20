@@ -16,6 +16,14 @@ export type UpdateUserData = {
 	password?: string,
 }
 
+export type GetPhotosData = {
+	id: number,
+	title: string,
+	url: string,
+	comment: string,
+	user_id: number,
+}
+
 export type CreatePhotoData = {
 	title: string,
 	url: string,
@@ -27,14 +35,11 @@ export type UpdatePhotoData = {
 	title?: string,
 	url?: string,
 	comment?: string,
-	user_id: number,
+
 }
 
-export type GetPhotosData = {
-	title: string,
-	url: string,
-	comment: string,
-	user_id: number,
+export type UpdateAlbumData = {
+	title?: string,
 }
 
 
@@ -46,3 +51,24 @@ export type JwtPayload ={
 	iat?: number,
 	exp?: number
 }
+
+export type CreateAlbumData = {
+	title: string,
+	user_id: number,
+}
+
+export type GetAllAlbums = {
+	title: string,
+	user_id: number,
+}
+
+export type Album ={
+  id: number;
+  title: string;
+  user_id: number; 
+}
+
+export type Photo ={
+	id: number;
+	user_id: number; 
+  }
