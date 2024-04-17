@@ -9,6 +9,7 @@ import jwt from 'jsonwebtoken'
 import { createUser, getUserByEmail } from '../services/user_service'
 import { JwtPayload } from '../types'
 
+
 // Create a new debug instance
 const debug = Debug('photo-album-api:user_controller')
 

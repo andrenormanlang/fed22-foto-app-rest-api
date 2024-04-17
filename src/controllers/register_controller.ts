@@ -38,9 +38,23 @@ export const register = async (req: Request, res: Response) => {
     //Check if a user with the incoming email already exists (other way of doing the handling)
 	//const user = await prisma.user.findUnique()
 
+  
     // Get only the validated data from the request
 	const validatedData = matchedData(req)
 	console.log("validatedData:", validatedData)
+
+	// Check if a user with the given email already exists
+	const userExists = await prisma.user.findUnique({
+		where: {
+		email: validatedData.email,
+		},
+	});
+	if (userExists) {
+		return res.status(409).send({ // 409 Conflict might be more appropriate than 400 Bad Request
+		status: "fail",
+		data: "User already exists with the given email address.",
+		});
+	}
 
     // Calculate a hash + salt for the password
 	const hashedPassword = await bcrypt.hash(validatedData.password, Number(process.env.SALT_ROUNDS) || 10)

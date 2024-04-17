@@ -12,6 +12,6 @@ router.get('/', getProfile)
 /**
 *PATCH /profile
 */
-router.patch('/', updateUserRules, updateProfile)
+router.patch('/', updateProfile)
 
 export default router

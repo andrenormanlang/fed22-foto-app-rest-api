@@ -5,9 +5,9 @@
 import Debug from 'debug'
 import { Request, Response } from 'express'
 import { validationResult } from 'express-validator'
-import { createAlbum, getAlbums, getAlbum, updateAlbum, addPhotos, deleteAlbum, removePhotoFromAlbum, getAlbumUser} from '../services/album_service'
+import { createAlbum, getAlbums, getAlbum, updateAlbum, /*addPhoto,*/ addPhotos, deleteAlbum, removePhotoFromAlbum, getAlbumUser} from '../services/album_service'
 import {Album} from '../types'
-import {HttpError} from  'http-errors'
+import {HttpError, NotFound, Forbidden} from  'http-errors'
 // Create a new debug instance
 const debug = Debug('prisma-foto-api:photos_controller')
 
@@ -117,49 +117,99 @@ export const store = async (req: Request, res: Response) => {
 }
 
 /**
+ * Add a photo to a album
+ */
+// export const addPhotoToAlbum = async (req: Request, res: Response) => {
+// 	const albumId = Number(req.params.albumId);
+// 	const photoId = Number(req.body.photo_id);
+// 	const userId = Number(req.token!.sub);
+  
+// 	try {
+// 	  await addPhoto(albumId, photoId, userId);
+  
+// 	  return res.status(200).send({
+// 		status: 'success',
+// 		data: null,
+// 	  });
+// 	} catch (err: any) {
+// 	  console.error(err);
+// 	  if (err.message === 'Album not found' || err.message === 'Photo not found') {
+// 		return res.status(404).send({
+// 		  status: 'fail',
+// 		  message: err.message,
+// 		});
+// 	  }
+// 	  if (err.message === 'Not authorized to access this album' || err.message === 'You do not have permission to add this photo to the album') {
+// 		return res.status(403).send({
+// 		  status: 'fail',
+// 		  message: err.message,
+// 		});
+// 	  }
+// 	  return res.status(500).send({
+// 		status: 'error',
+// 		message: 'Could not add photo to album',
+// 	  });
+// 	}
+//   };
+
+
+/**
  * Add multiple photos to a album
  */
 export const addPhotosToAlbum = async (req: Request, res: Response) => {
-	const validationErrors = validationResult(req)
+	const validationErrors = validationResult(req);
 	if (!validationErrors.isEmpty()) {
 	  return res.status(400).send({
 		status: "fail",
 		data: validationErrors.array()
-	  })
+	  });
 	}
-	
+  
 	try {
-		const albumId = Number(req.params.albumId);
-		const photo_id = req.body.photo_id;
-
-		if (!photo_id || !photo_id.some((id: string) => id.trim().length)) {
-			return res.status(400).send({
-			  status: "fail",
-			  message: "Missing photos in request body",
-			});
-		  }
-
-		const photo_idArray = photo_id.filter(Boolean).map(Number);
-		const user_id = Number(req.token!.sub);
-		
-		await addPhotos(albumId, photo_idArray, user_id);
-
-		return res.status(200).send({
-			status: "success",
-			data: null,	
-			});	
+	  const albumId = Number(req.params.albumId);
+	  const photoIds = req.body.photo_id;
+  
+	  if (!photoIds || !Array.isArray(photoIds) || photoIds.length === 0) {
+		return res.status(400).send({
+		  status: "fail",
+		  message: "Invalid photo_id parameter in request body",
+		});
+	  }
+  
+	  const invalidIds = photoIds.filter(id => isNaN(Number(id)));
+	  if (invalidIds.length > 0) {
+		return res.status(400).send({
+		  status: "fail",
+		  message: "Invalid photo_id parameter in request body",
+		});
+	  }
+  
+	  const user_id = Number(req.token!.sub);
+	  await addPhotos(albumId, photoIds.map(id => Number(id)), user_id);
+  
+	  return res.status(200).send({
+		status: "success",
+		data: null,
+	  });
 	} catch (err) {
-		if(err instanceof HttpError) {
-			
-		return res.status(err.statusCode).send({
-		status: "error",
-		message: err.message,
-		})}
-		else{
-		return res.status(500)
-		} 
+	  if (err instanceof NotFound) {
+		return res.status(404).send({
+		  status: "error",
+		  message: err.message,
+		});
+	  } else if (err instanceof Forbidden) {
+		return res.status(403).send({
+		  status: "error",
+		  message: err.message,
+		});
+	  } else {
+		return res.status(500).send({
+		  status: "error",
+		  message: "Internal Server Error",
+		});
+	  }
 	}
-};
+  };
   
 /**
  * Remove a photo from a album

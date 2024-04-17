@@ -44,19 +44,10 @@ export const getAlbum = async (albumId: number) => {
 }
 
 /**
- * Add a photo or multiple photos to a Album
+ * Add multiple photos to a Album
  *
  * @param data Album Details
  */
-
-class PhotoNotFoundError extends HttpError {
-  constructor(message: string = "Photo not found") {
-    super(message);
-    this.statusCode = 404;
-    Object.setPrototypeOf(this, PhotoNotFoundError.prototype);
-  }
-}
-
 export const addPhotos = async (albumId: number, photoIds: number[], user_id: number) => {
   const album = await prisma.album.findUnique({ where: { id: albumId } });
   if (!album) {
@@ -70,11 +61,13 @@ export const addPhotos = async (albumId: number, photoIds: number[], user_id: nu
     where: { id: { in: photoIds } }
   });
   if (photos.length !== photoIds.length) {
-    throw new Forbidden('Some of the photos do not exist');
+    const existingPhotoIds = photos.map((photo) => photo.id);
+    const nonExistingPhotoIds = photoIds.filter((id) => !existingPhotoIds.includes(id));
+    throw new Forbidden(`The following photoIds do not exist: ${nonExistingPhotoIds.join(', ')}`);
   }
 
-  const userIds = photos.map((photo:GetPhotosData) => photo.user_id);
-  if (userIds.some((id:number) => id !== user_id)) {
+  const userIds = photos.map((photo) => photo.user_id);
+  if (userIds.some((id) => id !== user_id)) {
     throw new Forbidden('You do not have permission to add some of the photos to the album');
   }
 
