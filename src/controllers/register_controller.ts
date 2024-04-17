@@ -60,7 +60,9 @@ export const login = async (req: Request, res: Response) => {
 	}
 	const payload: JwtPayload = {
 		sub: user.id,
-		email: user.email
+		email: user.email,
+		first_name: user.first_name,
+		last_name: user.last_name
 	}
 	if (!process.env.ACCESS_TOKEN_SECRET) {
 		return res.status(500).send({
