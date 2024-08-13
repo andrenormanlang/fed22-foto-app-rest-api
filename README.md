@@ -1,20 +1,11 @@
-# Photo API endpoints
+# Photo API
 
-- All passwords **must** be salted and hashed.
-- All received data **must** be sanitized and validated.
-- All endpoints for photos and albums **must** require authentication.
+- All passwords are salted and hashed.
+- All received data is sanitized and validated.
+- All endpoints for photos and albums require authentication using JSON Web Tokens.
+- Refresh of access tokens
 
-## For G
-
-- HTTP Basic Authentication must be used.
-
-## For VG
-
-- JSON Web Tokens must be used.
-- Refresh of access token must work.
-- As well as the sections below marked **[VG]**.
-
-# Route Map
+# Route Map & Endpoints
 
 ## Albums
 
